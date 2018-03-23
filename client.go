@@ -8,7 +8,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"sync"
 	"time"
@@ -31,6 +30,11 @@ type Error interface {
 	// Similarly, this will return the text response from the server, or empty
 	// string.
 	Message() string
+}
+
+// DebugLogger is the interface to log debug messages on an user-specified medium.
+type DebugLogger interface {
+	Debugf(f string, args ...interface{})
 }
 
 type ftpError struct {
@@ -125,9 +129,9 @@ type Config struct {
 	// IPv6 address to Dial() even with this flag off.
 	IPv6Lookup bool
 
-	// Logging destination for debugging messages. Set to os.Stderr to log to stderr.
+	// Logging destination for debugging messages.
 	// Password value will not be logged.
-	Logger io.Writer
+	DebugLogger
 
 	// Time zone of the FTP server. Used when parsing mtime from "LIST" output if
 	// server does not support "MLST"/"MLSD". Defaults to UTC.
@@ -235,11 +239,11 @@ func (c *Client) Close() error {
 // Log a debug message in the context of the client (i.e. not for a
 // particular connection).
 func (c *Client) debug(f string, args ...interface{}) {
-	if c.config.Logger == nil {
+	if c.config.DebugLogger == nil {
 		return
 	}
 
-	fmt.Fprintf(c.config.Logger, "goftp: %.3f %s\n",
+	c.config.DebugLogger.Debugf("%.3f %s\n",
 		time.Now().Sub(c.t0).Seconds(),
 		fmt.Sprintf(f, args...),
 	)

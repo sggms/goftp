@@ -182,11 +182,11 @@ func (pconn *persistentConn) readResponse() (int, string, error) {
 }
 
 func (pconn *persistentConn) debug(f string, args ...interface{}) {
-	if pconn.config.Logger == nil {
+	if pconn.config.DebugLogger == nil {
 		return
 	}
 
-	fmt.Fprintf(pconn.config.Logger, "goftp: %.3f #%d %s\n",
+	pconn.config.DebugLogger.Debugf("%.3f #%d %s\n",
 		time.Now().Sub(pconn.t0).Seconds(),
 		pconn.idx,
 		fmt.Sprintf(f, args...),
