@@ -175,12 +175,8 @@ func (c *Client) Stat(path string) (os.FileInfo, error) {
 				return nil, err
 			}
 
-			if len(lines) == 0 {
-				return nil, os.ErrNotExist
-			}
-
 			if len(lines) != 1 {
-				return nil, ftpError{err: fmt.Errorf("unexpected LIST response (1 line expected): %v", lines)}
+				return nil, ftpError{err: fmt.Errorf("unexpected LIST response (1 line expected, got %d instead): %v", len(lines), lines)}
 			}
 
 			return parseLIST(lines[0], c.config.ServerLocation, false)
